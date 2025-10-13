@@ -1,0 +1,17 @@
+'01-softmax-cpu':
+ - "tasks/01-softmax-cpu/**"
+'02-softmax-cuda':
+ - "tasks/02-softmax-cuda/**"
+'03-matmul-cuda':
+ - "tasks/03-matmul-cuda/**"
+'04-softmax-ascend':
+ - "tasks/04-softmax-ascend/**"
+'05-mixed-ascend':
+ - "tasks/05-mixed-ascend/**"
+
+docs:
+ - "README.md"
+ - "LICENSE.txt"
+
+ci:
+ - ".github/**"

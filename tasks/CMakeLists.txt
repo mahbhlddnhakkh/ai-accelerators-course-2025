@@ -1,0 +1,50 @@
+function(task_is_enabled path result_var)
+    string(TOLOWER "${path}" lower_path)
+    set(is_enabled ON)
+    if(lower_path MATCHES "cuda")
+        set(is_enabled ${ENABLE_CUDA})
+    elseif(lower_path MATCHES "ascend")
+        set(is_enabled ${ENABLE_ASCEND})
+    elseif(lower_path MATCHES "cpu")
+        set(is_enabled ${ENABLE_CPU})
+    endif()
+    set(${result_var} ${is_enabled} PARENT_SCOPE)
+endfunction()
+
+file(GLOB numbered_tasks
+     RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+     "[0-9][0-9]-*")
+
+list(SORT numbered_tasks)
+
+foreach(task_dir ${numbered_tasks})
+    task_is_enabled("${task_dir}" task_enabled)
+    if(NOT task_enabled)
+        continue()
+    endif()
+
+    set(task_path "${CMAKE_CURRENT_SOURCE_DIR}/${task_dir}")
+    if(IS_DIRECTORY "${task_path}")
+        if(EXISTS "${task_path}/CMakeLists.txt")
+            add_subdirectory("${task_dir}")
+        else()
+            file(GLOB task_children
+                 RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
+                 "${task_dir}/*")
+            if(task_children)
+                list(SORT task_children)
+            endif()
+            foreach(child ${task_children})
+                task_is_enabled("${child}" child_enabled)
+                if(NOT child_enabled)
+                    continue()
+                endif()
+
+                set(child_path "${CMAKE_CURRENT_SOURCE_DIR}/${child}")
+                if(IS_DIRECTORY "${child_path}" AND EXISTS "${child_path}/CMakeLists.txt")
+                    add_subdirectory("${child}")
+                endif()
+            endforeach()
+        endif()
+    endif()
+endforeach()

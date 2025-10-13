@@ -1,0 +1,65 @@
+name: Build workloads
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  cpu:
+    name: CPU build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure CPU targets
+        run: cmake -S . -B build/cpu -DCMAKE_BUILD_TYPE=Release -DENABLE_CPU=ON
+      - name: Build CPU targets
+        run: cmake --build build/cpu --config Release
+      - name: Run softmax CPU executables
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t executables < <(find build/cpu -maxdepth 5 -type f -executable -name 'softmax_cpu_*' | sort)
+          for exe in "${executables[@]}"; do
+            echo "Running ${exe}"
+            if [[ "${exe}" == *example* ]]; then
+              "${exe}" 512 || true
+            else
+              "${exe}" 1
+              "${exe}" 2
+              "${exe}" 4
+              "${exe}" 5
+              "${exe}" 8
+              "${exe}" 16
+              "${exe}" 32
+              "${exe}" 64
+              "${exe}" 128
+              "${exe}" 256
+              "${exe}" 512
+              "${exe}" 1023
+              "${exe}" 1024
+            fi
+          done
+
+  cuda:
+    name: CUDA build
+    runs-on: ubuntu-latest
+    container:
+      image: nvidia/cuda:12.3.2-devel-ubuntu22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build tooling
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends build-essential cmake
+          rm -rf /var/lib/apt/lists/*
+      - name: Configure CUDA targets
+        run: cmake -S . -B build/cuda -DCMAKE_BUILD_TYPE=Release -DENABLE_CUDA=ON
+      - name: Build CUDA targets
+        run: cmake --build build/cuda --config Release
+
+  ascend:
+    if: ${{ false }}
+    name: Ascend build (disabled)
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Ascend workload disabled for now"
