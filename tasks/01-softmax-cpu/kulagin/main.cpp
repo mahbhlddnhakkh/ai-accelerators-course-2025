@@ -254,7 +254,7 @@ int main(int argc, char *argv[]) {
 namespace {
 
 __m256 exp256_ps(__m256 x) {
-//  https://stackoverflow.com/questions/48863719
+  //  https://stackoverflow.com/questions/48863719
   /* Modified code from this source: https://github.com/reyoung/avx_mathfun
 
    AVX implementation of exp
@@ -281,7 +281,7 @@ __m256 exp256_ps(__m256 x) {
   (this is the zlib license)
 
   */
-  /* 
+  /*
     To increase the compatibility across different compilers the original code
     is converted to plain AVX2 intrinsics code without ingenious macro's, gcc
     style alignment attributes etc. Moreover, the part
