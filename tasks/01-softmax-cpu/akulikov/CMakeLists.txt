@@ -4,6 +4,7 @@ set(target_name "softmax_cpu_${target_suffix}")
 add_executable(${target_name} main.cpp)
 
 target_compile_features(${target_name} PRIVATE cxx_std_17)
+target_compile_options(${target_name} PRIVATE -O3)
 
 include(CheckCXXCompilerFlag)
 check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
