@@ -40,7 +40,7 @@ void calc_row_simd(const float *row, float *row_res, const std::size_t n) {
   __m256 tmp;
   float d = 0.0f;
   const std::size_t tail_start = n - n % 8;
-  const std::size_t tail_stop = n - 8;
+  const std::size_t tail_stop = n - 7;
   for (std::size_t i = 0; i < tail_stop; i += 8) {
     tmp = _mm256_loadu_ps(row + i);
     tmp = exp256_ps(tmp);
