@@ -1,5 +1,5 @@
-#include <cuda_runtime.h>
 #include <bits/stdc++.h>
+#include <cuda_runtime.h>
 
 #include <algorithm>
 #include <chrono>
@@ -69,15 +69,15 @@ std::vector<float> run_sequential(const std::vector<float> &matrix,
   return res;
 }
 
-__global__ void softmax_kernel(const float *d_input, float *d_output, std::size_t n) {
+__global__ void softmax_kernel(const float *input, float *output, size_t n) {
   __shared__ float s_d[1];
   if (threadIdx.x == 0) {
     *s_d = 0.0f;
   }
   __syncthreads();
   const int d_offset = blockIdx.x * n;
-  const float *row = d_input + d_offset;
-  float *res = d_output + d_offset;
+  const float *row = input + d_offset;
+  float *res = output + d_offset;
   float d = 0.0f;
   for (size_t i = threadIdx.x; i < n; i += blockDim.x) {
     d += __expf(row[i]);
@@ -96,13 +96,13 @@ std::vector<float> run_cuda_simt(const std::vector<float> &matrix,
     throw std::runtime_error("n == 0");
   }
   const std::size_t block_size = 512;
-  std::size_t sz_b = n * n * sizeof(*matrix.data());
+  std::size_t szb = n * n * sizeof(*matrix.data());
   std::vector<float> res(n * n);
   float *d_m;
   float *d_res;
-  CHECK_CUDA_ERROR(cudaMalloc(&d_m, sz_b));
-  CHECK_CUDA_ERROR(cudaMalloc(&d_res, sz_b));
-  CHECK_CUDA_ERROR(cudaMemcpy(d_m, matrix.data(), sz_b, cudaMemcpyHostToDevice));
+  CHECK_CUDA_ERROR(cudaMalloc(&d_m, szb));
+  CHECK_CUDA_ERROR(cudaMalloc(&d_res, szb));
+  CHECK_CUDA_ERROR(cudaMemcpy(d_m, matrix.data(), szb, cudaMemcpyHostToDevice));
   // #define LAB_CUDA_TIMING
 #ifdef LAB_CUDA_TIMING
   float elapsedTime = -1.0f;
@@ -117,10 +117,10 @@ std::vector<float> run_cuda_simt(const std::vector<float> &matrix,
   CHECK_CUDA_ERROR(cudaGetLastError());
   CHECK_CUDA_ERROR(cudaEventSynchronize(stop));
   CHECK_CUDA_ERROR(cudaEventElapsedTime(&elapsedTime, start, stop));
-  std::cout << "CUDA elapsed time: " << elapsedTime << " ms\n"; // time in ms
+  std::cout << "CUDA elapsed time: " << elapsedTime << " ms\n";
 #endif
   CHECK_CUDA_ERROR(cudaDeviceSynchronize());
-  CHECK_CUDA_ERROR(cudaMemcpy(res.data(), d_res, sz_b, cudaMemcpyDeviceToHost));
+  CHECK_CUDA_ERROR(cudaMemcpy(res.data(), d_res, szb, cudaMemcpyDeviceToHost));
   CHECK_CUDA_ERROR(cudaFree(d_m));
   CHECK_CUDA_ERROR(cudaFree(d_res));
   return res;
