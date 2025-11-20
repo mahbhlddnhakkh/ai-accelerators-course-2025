@@ -138,7 +138,7 @@ __global__ void wmma_gemm(const __half *a, const __half *b, float *output,
                                   nvcuda::wmma::mem_row_major);
 }
 
-#define upper_div(a, b) (((a) + (b)-1) / (b))
+#define upper_div(a, b) (((a) + (b) - 1) / (b))
 
 template <bool measure_time_internal = measure_time_internal_all,
           bool separate_measure = separate_measure_all>
