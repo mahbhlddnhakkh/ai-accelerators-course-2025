@@ -1,0 +1,24 @@
+{
+  "name": "CUDA (NVIDIA Official)",
+  "image": "nvidia/cuda:12.4.1-devel-ubuntu22.04",
+  "workspaceFolder": "/workspaces/ai-accelerators-course",
+  "remoteUser": "root",
+  "runArgs": [
+    "--gpus=all"
+  ],
+  "containerEnv": {
+    "DEBIAN_FRONTEND": "noninteractive"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "ms-azuretools.vscode-docker",
+        "NVIDIA.nsight-vscode-edition"
+      ]
+    }
+  },
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} || true"
+}
