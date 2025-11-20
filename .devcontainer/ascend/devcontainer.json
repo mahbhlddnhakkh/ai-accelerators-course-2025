@@ -1,0 +1,21 @@
+{
+  "name": "Ascend (CANN 8.2 rc1)",
+  "image": "ghcr.io/nn-complr-tech/ascendc-community-cann:8.2.rc1",
+  "workspaceFolder": "/workspaces/ai-accelerators-course",
+  "remoteUser": "root",
+  "runArgs": [],
+  "containerEnv": {
+    "DEBIAN_FRONTEND": "noninteractive"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder} || true"
+}
