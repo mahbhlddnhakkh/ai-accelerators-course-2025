@@ -59,9 +59,17 @@ jobs:
       - name: Build CUDA targets
         run: cmake --build build/cuda --config Release
 
-  ascend:
-    if: ${{ false }}
-    name: Ascend build (disabled)
+  ascend-sim:
+    name: Ascend sim build & run
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/nn-complr-tech/ascendc-community-cann:8.2.rc1
+      options: --user root
     steps:
-      - run: echo "Ascend workload disabled for now"
+      - uses: actions/checkout@v4
+      - name: Configure Ascend targets
+        run: cmake -S . -B build/ascend -DCMAKE_BUILD_TYPE=Release -DENABLE_ASCEND=ON
+      - name: Build Ascend targets
+        run: cmake --build build/ascend --config Release
+      - name: Run Ascend softmax (sim)
+        run: cmake --build build/ascend --target run_softmax_ascend_all --config Release
