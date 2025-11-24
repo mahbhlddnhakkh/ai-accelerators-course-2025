@@ -9,11 +9,11 @@ def main():
     moscow_tz = ZoneInfo("Europe/Moscow")
     current_date = datetime.now(moscow_tz)
     deadline_date = {
-        "01-softmax-cpu": datetime(2026, 1, 1, hour=1, tzinfo=moscow_tz),
-        "02-softmax-cuda": datetime(2026, 1, 1, hour=1, tzinfo=moscow_tz),
-        "03-matmul-cuda": datetime(2026, 1, 1, hour=1, tzinfo=moscow_tz),
-        "04-softmax-ascend": datetime(2026, 1, 1, hour=1, tzinfo=moscow_tz),
-        "05-mixed-ascend": datetime(2026, 1, 1, hour=1, tzinfo=moscow_tz),
+        "01-softmax-cpu": datetime(2025, 11, 21, hour=1, tzinfo=moscow_tz),
+        "02-softmax-cuda": datetime(2025, 11, 21, hour=1, tzinfo=moscow_tz),
+        "03-matmul-cuda": datetime(2025, 11, 21, hour=1, tzinfo=moscow_tz),
+        "04-softmax-ascend": datetime(2025, 12, 19, hour=1, tzinfo=moscow_tz),
+        "05-mixed-ascend": datetime(2025, 12, 26, hour=1, tzinfo=moscow_tz),
     }
 
     gh = Github(os.environ["GITHUB_TOKEN"])
