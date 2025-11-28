@@ -1,6 +1,6 @@
 {
-  "name": "Ascend (CANN 8.2 rc1)",
-  "image": "ghcr.io/nn-complr-tech/ascendc-community-cann:8.2.rc1",
+  "name": "Ascend (CANN 8.3 rc2)",
+  "image": "ghcr.io/nn-complr-tech/ascendc-community-cann:8.3.rc2",
   "workspaceFolder": "/workspaces/ai-accelerators-course",
   "remoteUser": "root",
   "runArgs": [],
