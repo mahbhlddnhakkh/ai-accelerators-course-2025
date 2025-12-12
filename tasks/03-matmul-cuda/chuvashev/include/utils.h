@@ -63,29 +63,36 @@ float max_abs_diff(const std::vector<float> &baseline,
 std::string format_time(double seconds);
 std::string format_diff(float diff);
 
-void run_openmp_reference(const std::vector<__half> &input,
+void run_openmp_reference(const std::vector<__half> &input_A,
+                          const std::vector<__half> &input_B,
                           std::vector<float> &output, const std::size_t n);
 
-void run_matrix_mult_gpu_ver_1(const std::vector<__half> &input,
+void run_matrix_mult_gpu_ver_1(const std::vector<__half> &input_A,
+                               const std::vector<__half> &input_B,
                                std::vector<float> &output, const std::size_t n);
 __global__ void GPU_MATMUL_V1(const __half *input, float *output,
                               const std::size_t n);
 
 __global__ void GPU_MATMUL_V2(const __half *input, float *output,
                               const std::size_t n);
-void run_matrix_mult_gpu_ver_2(const std::vector<__half> &input,
+void run_matrix_mult_gpu_ver_2(const std::vector<__half> &input_A,
+                               const std::vector<__half> &input_B,
                                std::vector<float> &output, const std::size_t n);
 
-void warmup_wmma(const std::vector<__half> &input, std::vector<float> &output,
+void warmup_wmma(const std::vector<__half> &input_A,
+                 const std::vector<__half> &input_B, std::vector<float> &output,
                  const std::size_t n);
 __global__ void WMMA_kernel(const __half *input, float *output,
                             const std::size_t n);
-void run_wmma(const std::vector<__half> &input, std::vector<float> &output,
+void run_wmma(const std::vector<__half> &input_A,
+              const std::vector<__half> &input_B, std::vector<float> &output,
               const std::size_t n);
 
-void warmup_cutlass(const std::vector<__half> &input,
+void warmup_cutlass(const std::vector<__half> &input_A,
+                    const std::vector<__half> &input_B,
                     std::vector<float> &output, const std::size_t n);
-void run_cutlass(const std::vector<__half> &input, std::vector<float> &output,
+void run_cutlass(const std::vector<__half> &input_A,
+                 const std::vector<__half> &input_B, std::vector<float> &output,
                  std::size_t n);
 
 __global__ void softmax_kernel(float *d_matrix, size_t n);

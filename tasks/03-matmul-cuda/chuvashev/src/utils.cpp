@@ -70,7 +70,8 @@ std::string format_diff(float diff) {
   return oss.str();
 }
 
-void run_openmp_reference(const std::vector<__half> &input,
+void run_openmp_reference(const std::vector<__half> &input_A,
+                          const std::vector<__half> &input_B,
                           std::vector<float> &output, const std::size_t n) {
   // throw std::runtime_error("OpenMP reference not implemented");
 
@@ -89,9 +90,9 @@ void run_openmp_reference(const std::vector<__half> &input,
         int k_end = (std::min)((kk + 1) * block_size, (int)n);
         for (int i = i_start; i < i_end; ++i) {
           for (int k = k_start; k < k_end; ++k) {
-            float value = __half2float(input[i * n + k]);
+            float value = __half2float(input_A[i * n + k]);
             for (int j = j_start; j < j_end; ++j) {
-              output[i * n + j] += value * __half2float(input[k * n + j]);
+              output[i * n + j] += value * __half2float(input_B[k * n + j]);
             }
           }
         }

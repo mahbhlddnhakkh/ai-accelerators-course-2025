@@ -5,16 +5,21 @@
 #define WMMA_SIZE 16
 using namespace nvcuda;
 
-void warmup_wmma(const std::vector<__half> &input, std::vector<float> &output,
+void warmup_wmma(const std::vector<__half> &input_A,
+                 const std::vector<__half> &input_B, std::vector<float> &output,
                  const std::size_t n) {
   // throw std::runtime_error("WMMA warm-up not implemented");
-  run_wmma(input, output, n);
+  run_wmma(input_A, input_B, output, n);
 }
 
-__global__ void WMMA_kernel(const __half *input, float *output,
-                            const std::size_t n) {
+__global__ void WMMA_kernel(const __half *input_A, const __half *input_B,
+                            float *output, const std::size_t n) {
   int warp_i = (blockIdx.x * blockDim.x + threadIdx.x) / warpSize;
   int warp_j = (blockIdx.y * blockDim.y + threadIdx.y);
+
+  if (warp_i * WMMA_SIZE >= n || warp_j * WMMA_SIZE >= n) {
+    return;
+  }
 
   wmma::fragment<wmma::matrix_a, WMMA_SIZE, WMMA_SIZE, WMMA_SIZE, __half,
                  wmma::row_major>
@@ -33,8 +38,8 @@ __global__ void WMMA_kernel(const __half *input, float *output,
     int b_row = k;
     int b_col = warp_j * WMMA_SIZE;
 
-    wmma::load_matrix_sync(a_frag, input + a_row * n + a_col, n);
-    wmma::load_matrix_sync(b_frag, input + b_row * n + b_col, n);
+    wmma::load_matrix_sync(a_frag, input_A + a_row * n + a_col, n);
+    wmma::load_matrix_sync(b_frag, input_B + b_row * n + b_col, n);
 
     wmma::mma_sync(acc_frag, a_frag, b_frag, acc_frag);
   }
@@ -46,24 +51,30 @@ __global__ void WMMA_kernel(const __half *input, float *output,
                           wmma::mem_row_major);
 }
 
-void run_wmma(const std::vector<__half> &input, std::vector<float> &output,
+void run_wmma(const std::vector<__half> &input_A,
+              const std::vector<__half> &input_B, std::vector<float> &output,
               const std::size_t n) {
   // throw std::runtime_error("WMMA method not implemented");
 
-  __half *d_input;
+  __half *d_input_A;
+  __half *d_input_B;
   float *d_output;
 
-  CHECK_CUDA_ERROR(cudaMalloc(&d_input, n * n * sizeof(__half)));
+  CHECK_CUDA_ERROR(cudaMalloc(&d_input_A, n * n * sizeof(__half)));
+  CHECK_CUDA_ERROR(cudaMalloc(&d_input_B, n * n * sizeof(__half)));
   CHECK_CUDA_ERROR(cudaMalloc(&d_output, n * n * sizeof(float)));
 
-  CHECK_CUDA_ERROR(cudaMemcpy(d_input, input.data(), n * n * sizeof(__half),
+  CHECK_CUDA_ERROR(cudaMemcpy(d_input_A, input_A.data(), n * n * sizeof(__half),
+                              cudaMemcpyHostToDevice));
+  CHECK_CUDA_ERROR(cudaMemcpy(d_input_B, input_B.data(), n * n * sizeof(__half),
                               cudaMemcpyHostToDevice));
 
   dim3 block_size(4 * WARP_SIZE, 4);
-  dim3 block_count((n / block_size.x) * (WARP_SIZE / WMMA_SIZE),
-                   (n / block_size.y) / WMMA_SIZE);
+  dim3 block_count(
+      ((n + block_size.x - 1) / block_size.x) * (WARP_SIZE / WMMA_SIZE),
+      (((n + block_size.y - 1) / block_size.y) + WMMA_SIZE - 1) / WMMA_SIZE);
   timer timer;
-  WMMA_kernel<<<block_count, block_size>>>(d_input, d_output, n);
+  WMMA_kernel<<<block_count, block_size>>>(d_input_A, d_input_B, d_output, n);
   CHECK_CUDA_ERROR(cudaDeviceSynchronize());
   double time = timer.elapsed();
   std::cout << "Time of work WMMA's kernel: " << time << std::endl;
@@ -76,6 +87,7 @@ void run_wmma(const std::vector<__half> &input, std::vector<float> &output,
   CHECK_CUDA_ERROR(cudaMemcpy(output.data(), d_output, n * n * sizeof(float),
                               cudaMemcpyDeviceToHost));
 
-  CHECK_CUDA_ERROR(cudaFree(d_input));
+  CHECK_CUDA_ERROR(cudaFree(d_input_A));
+  CHECK_CUDA_ERROR(cudaFree(d_input_B));
   CHECK_CUDA_ERROR(cudaFree(d_output));
 }
