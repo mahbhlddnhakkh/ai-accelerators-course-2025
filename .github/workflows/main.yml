@@ -73,3 +73,5 @@ jobs:
         run: cmake --build build/ascend --config Release
       - name: Run Ascend softmax (sim)
         run: cmake --build build/ascend --target run_softmax_ascend_all --config Release
+      - name: Run Ascend mixed (sim)
+        run: cmake --build build/ascend --target run_mixed_ascend_all --config Release
