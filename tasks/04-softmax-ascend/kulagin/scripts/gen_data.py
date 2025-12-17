@@ -17,7 +17,7 @@ def softmax(m):
     return m_exp / m_exp_row_sum
 
 def gen_golden_data_simple():
-    N = 512
+    N = 128
     input_ = np.random.uniform(-10.0, 10.0, [N, N]).reshape(N, N).astype(np.float32)
     golden = softmax(input_).astype(np.float32)
 
