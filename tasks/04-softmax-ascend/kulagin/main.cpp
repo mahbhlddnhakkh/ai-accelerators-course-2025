@@ -20,7 +20,7 @@ extern "C" __global__ __aicore__ void softmax_custom(GM_ADDR x, GM_ADDR z);
 #endif
 
 int32_t main(int32_t argc, char* argv[]) {
-  uint32_t blockDim = N;
+  uint32_t blockDim = USE_CORE_NUM;
   size_t inputByteSize = N * N * sizeof(float);
   size_t outputByteSize = N * N * sizeof(float);
 
