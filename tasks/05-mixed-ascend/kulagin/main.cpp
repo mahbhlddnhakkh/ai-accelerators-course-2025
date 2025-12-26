@@ -7,13 +7,13 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
-#include "shared_data.h"
 #include "data_utils.h"
 #include "kernel_tiling/kernel_tiling.h"
+#include "shared_data.h"
 #include "tiling/platform/platform_ascendc.h"
 #ifndef ASCENDC_CPU_DEBUG
 #include "acl/acl.h"
-//#include "aclrtlaunch_matmul_leakyrelu_custom.h"
+// #include "aclrtlaunch_matmul_leakyrelu_custom.h"
 #if USE_NAIVE_IMPL == 0
 #include "aclrtlaunch_matmul_softmax_custom.h"
 #else
@@ -25,9 +25,10 @@ extern void softmax_custom_do(uint32_t blockDim, void* stream, uint8_t* x,
 #include "tikicpulib.h"
 #if USE_NAIVE_IMPL == 0
 extern "C" void matmul_softmax_custom(uint8_t*, uint8_t*, uint8_t*, uint8_t*,
-                                        uint8_t*, uint8_t*);
+                                      uint8_t*, uint8_t*);
 #else
-extern "C" void matmul_custom(uint8_t *a, uint8_t *b, uint8_t *bias, uint8_t *c, uint8_t *workspace, uint8_t *tiling);
+extern "C" void matmul_custom(uint8_t* a, uint8_t* b, uint8_t* bias, uint8_t* c,
+                              uint8_t* workspace, uint8_t* tiling);
 extern "C" __global__ __aicore__ void softmax_custom(GM_ADDR x, GM_ADDR z);
 #endif
 #endif
@@ -37,10 +38,10 @@ int32_t main1(int32_t argc, char* argv[]) {
   const char* socVersion = SOC_VERSION;
   auto ascendcPlatform =
       platform_ascendc::PlatformAscendCManager::GetInstance(socVersion);
-  //size_t aFileSize = 262144 * sizeof(int16_t);
-  //size_t bFileSize = 163840 * sizeof(int16_t);
-  //size_t cFileSize = 655360 * sizeof(float);
-  //size_t biasFileSize = 640 * sizeof(float);
+  // size_t aFileSize = 262144 * sizeof(int16_t);
+  // size_t bFileSize = 163840 * sizeof(int16_t);
+  // size_t cFileSize = 655360 * sizeof(float);
+  // size_t biasFileSize = 640 * sizeof(float);
   size_t aFileSize = N_m * N_m * sizeof(int16_t);
   size_t bFileSize = N_m * N_m * sizeof(int16_t);
   size_t cFileSize = N_m * N_m * sizeof(float);
@@ -70,12 +71,11 @@ int32_t main1(int32_t argc, char* argv[]) {
   ReadFile("./input/x2_gm.bin", bFileSize, b, bFileSize);
   ReadFile("./input/bias.bin", biasFileSize, bias, biasFileSize);
   memcpy_s(tiling, tilingFileSize, tilingBuf, tilingFileSize);
-#if USE_NAIVE_IMPL == 0
+#if USE_NAIVE_IMPL == 0  // Don't mind this
   ICPU_RUN_KF(matmul_softmax_custom, blockDim, a, b, bias, c, workspace,
               tiling);
 #else
-  ICPU_RUN_KF(matmul_custom, blockDim, a, b, bias, c, workspace,
-              tiling);
+  ICPU_RUN_KF(matmul_custom, blockDim, a, b, bias, c, workspace, tiling);
   AscendC::SetKernelMode(KernelMode::AIV_MODE);
   ICPU_RUN_KF(softmax_custom, SOFTMAX_USE_CORE_NAIVE, c, c);
 #endif
@@ -140,20 +140,21 @@ int32_t main1(int32_t argc, char* argv[]) {
   CHECK_ACL(aclrtMalloc((void**)&workspaceDevice, workspaceSize,
                         ACL_MEM_MALLOC_HUGE_FIRST));
 
-#if USE_NAIVE_IMPL == 0
+#if USE_NAIVE_IMPL == 0  // Don't mind this
   ACLRT_LAUNCH_KERNEL(matmul_softmax_custom)
   (blockDim, stream, inputADevice, inputBDevice, inputBiasDevice, outputCDevice,
    workspaceDevice, tilingDevice);
 #else
-  uint8_t *outputCDevice2;
+  uint8_t* outputCDevice2;
   CHECK_ACL(aclrtMalloc((void**)&outputCDevice2, cFileSize,
                         ACL_MEM_MALLOC_HUGE_FIRST));
   ACLRT_LAUNCH_KERNEL(matmul_custom)
   (blockDim, stream, inputADevice, inputBDevice, inputBiasDevice, outputCDevice,
    workspaceDevice, tilingDevice);
   CHECK_ACL(aclrtSynchronizeStream(stream));
-  
-  softmax_custom_do(SOFTMAX_USE_CORE_NAIVE, stream, outputCDevice, outputCDevice);
+
+  softmax_custom_do(SOFTMAX_USE_CORE_NAIVE, stream, outputCDevice,
+                    outputCDevice);
 #endif
 
   CHECK_ACL(aclrtSynchronizeStream(stream));
@@ -210,12 +211,12 @@ int32_t main(int32_t argc, char* argv[]) {
   uint8_t *xHost, *zHost;
   uint8_t *xDevice, *zDevice;
 
-  CHECK_ACL(aclrtMallocHost((void **)(&xHost), inputByteSize));
-  CHECK_ACL(aclrtMallocHost((void **)(&zHost), outputByteSize));
+  CHECK_ACL(aclrtMallocHost((void**)(&xHost), inputByteSize));
+  CHECK_ACL(aclrtMallocHost((void**)(&zHost), outputByteSize));
   CHECK_ACL(
-      aclrtMalloc((void **)&xDevice, inputByteSize, ACL_MEM_MALLOC_HUGE_FIRST));
-  CHECK_ACL(aclrtMalloc((void **)&zDevice, outputByteSize,
-                        ACL_MEM_MALLOC_HUGE_FIRST));
+      aclrtMalloc((void**)&xDevice, inputByteSize, ACL_MEM_MALLOC_HUGE_FIRST));
+  CHECK_ACL(
+      aclrtMalloc((void**)&zDevice, outputByteSize, ACL_MEM_MALLOC_HUGE_FIRST));
 
   ReadFile("./output/output2.bin", inputByteSize, xHost, inputByteSize);
 

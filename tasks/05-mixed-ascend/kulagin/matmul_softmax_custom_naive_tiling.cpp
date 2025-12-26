@@ -75,7 +75,8 @@ void GenerateTiling(const char* socVersion, uint8_t* tilingBuf) {
   tilingApi.SetBias(isBias);
   tilingApi.SetTraverse(
       MatrixTraverse::FIRSTM);  // Set the matmul traverse is FIRSTM.
-  tilingApi.SetFixSplit(baseM, baseN, -1);  // Set the fixed baseM=128, baseN=256.
+  tilingApi.SetFixSplit(baseM, baseN,
+                        -1);  // Set the fixed baseM=128, baseN=256.
   tilingApi.SetBufferSpace(-1, -1, -1);
 
   int64_t res = tilingApi.GetTiling(tilingData);  // Get matmul tiling data.
