@@ -1,0 +1,12 @@
+out/*
+output/*
+input/*
+build/*
+*.dump
+ascendc_kernels_bbit
+profile_*.toml
+*.log
+cceprint/*
+npuchk/*
+
+# Can't figure out yet
