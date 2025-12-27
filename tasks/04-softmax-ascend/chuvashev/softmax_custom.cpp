@@ -138,6 +138,12 @@ class KernelSoftmax {
       AscendC::Duplicate(exps, 0.0f, mask, 1, 1, 1);
     }
 
+    // if (aligned_elems != actual_elems) {
+    //   for (uint32_t i = actual_elems; i < aligned_elems; ++i) {
+    //       exps.SetValue(i, 0.0f);
+    //   }
+    // }
+
     AscendC::Add(sums, sums, exps, aligned_elems);
 
     in_queue_x.FreeTensor(x_local);
@@ -161,6 +167,12 @@ class KernelSoftmax {
 
       AscendC::Duplicate(exps, 0.0f, mask, 1, 1, 1);
     }
+
+    // if (aligned_elems != actual_elems) {
+    //   for (uint32_t i = actual_elems; i < aligned_elems; ++i) {
+    //       exps.SetValue(i, 0.0f);
+    //   }
+    // }
 
     // AscendC::Div(y_local, exps, div, aligned_elems);
     AscendC::Div(y_local, exps, sums, aligned_elems);

@@ -24,14 +24,14 @@ void GenerateTilingData(uint32_t n, TileInfo& tiling) {
   tiling.N = n;
   tiling.buffer_num = 2;
 
-  if (tiling.N < 16) {
+  if (tiling.N < 8) {
     tiling.num_of_ai_cores = tiling.N;
   } else {
-    tiling.num_of_ai_cores = 16;
+    tiling.num_of_ai_cores = 8;
   }
 
   tiling.tile_length =
-      1024 / tiling.buffer_num;  // учитываем, что DoubleBuffering
+      512 / tiling.buffer_num;  // учитываем, что DoubleBuffering
   tiling.sizeof_type = sizeof(float);
 
   std::size_t bytes = n * tiling.sizeof_type;
